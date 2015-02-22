@@ -6,40 +6,79 @@
 //  Copyright (c) 2015 a. All rights reserved.
 //
 
+struct PhysicsCategory {
+    static let None     : UInt32 = 0
+    static let All      : UInt32 = UInt32.max
+    static let Paddle   : UInt32 = 0b1
+    static let Ball     : UInt32 = 0b10
+}
+
 import SpriteKit
 
-class GameScene: SKScene {
+let kPaddleWidth:CGFloat = 20
+let kPaddleHeight:CGFloat = 60
+let kBallDiameter:CGFloat = 20
+let startingVx:CGFloat = 130
+let startingVy:CGFloat = -130
+
+class GameScene: SKScene, SKPhysicsContactDelegate {
+
+    let paddleLeft = SKSpriteNode(color: UIColor.blueColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
+    let paddleRight = SKSpriteNode(color:UIColor.redColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
+    let ball = SKShapeNode(circleOfRadius: kBallDiameter/2)
+    
+    
     override func didMoveToView(view: SKView) {
-        /* Setup your scene here */
-        let myLabel = SKLabelNode(fontNamed:"Chalkduster")
-        myLabel.text = "Hello, World!";
-        myLabel.fontSize = 65;
-        myLabel.position = CGPoint(x:CGRectGetMidX(self.frame), y:CGRectGetMidY(self.frame));
         
-        self.addChild(myLabel)
+        backgroundColor = UIColor.blackColor()
+
+        physicsWorld.gravity = CGVectorMake(0, 0)
+        physicsWorld.contactDelegate = self;
+        
+        //ball
+        ball.fillColor = UIColor.whiteColor()
+        ball.physicsBody = SKPhysicsBody(rectangleOfSize: CGSizeMake(kBallDiameter, kBallDiameter))
+        ball.physicsBody?.dynamic = true
+        ball.physicsBody?.categoryBitMask = PhysicsCategory.Ball
+        ball.physicsBody?.contactTestBitMask = PhysicsCategory.Paddle
+        ball.physicsBody?.collisionBitMask = PhysicsCategory.None //i think i want to handle this myself
+        ball.position = CGPoint(x: size.width / 2, y: size.height + kBallDiameter)
+        addChild(ball)
+        
+        paddleLeft.physicsBody = SKPhysicsBody(rectangleOfSize: paddleLeft.size);
+        paddleLeft.physicsBody?.dynamic = true
+        paddleLeft.physicsBody?.categoryBitMask = PhysicsCategory.Paddle
+        paddleLeft.physicsBody?.contactTestBitMask = PhysicsCategory.Ball
+        paddleLeft.physicsBody?.collisionBitMask = PhysicsCategory.None
+        paddleLeft.position = CGPoint(x: size.width / 20, y: size.height / 2)
+        addChild(paddleLeft)
+
+        paddleRight.physicsBody = SKPhysicsBody(rectangleOfSize: paddleRight.size);
+        paddleRight.physicsBody?.dynamic = true
+        paddleRight.physicsBody?.categoryBitMask = PhysicsCategory.Paddle
+        paddleRight.physicsBody?.contactTestBitMask = PhysicsCategory.Ball
+        paddleRight.physicsBody?.collisionBitMask = PhysicsCategory.None
+        paddleRight.position = CGPoint(x: size.width - (size.width / 20), y: size.height / 2)
+        addChild(paddleRight)
+        
+        startGame()
+        
     }
     
-    override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
-        /* Called when a touch begins */
-        
-        for touch: AnyObject in touches {
-            let location = touch.locationInNode(self)
-            
-            let sprite = SKSpriteNode(imageNamed:"Spaceship")
-            
-            sprite.xScale = 0.5
-            sprite.yScale = 0.5
-            sprite.position = location
-            
-            let action = SKAction.rotateByAngle(CGFloat(M_PI), duration:1)
-            
-            sprite.runAction(SKAction.repeatActionForever(action))
-            
-            self.addChild(sprite)
-        }
+    func startGame() {
+        ball.physicsBody?.velocity = CGVectorMake(startingVx, startingVy);
     }
-   
-    override func update(currentTime: CFTimeInterval) {
-        /* Called before each frame is rendered */
+        
+    override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+     
+    }
+
+    
+    func random() -> CGFloat {
+        return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
+    }
+    
+    func random(#min: CGFloat, max: CGFloat) -> CGFloat {
+        return random() * (max - min) + min
     }
 }
