@@ -9,8 +9,9 @@
 struct PhysicsCategory {
     static let None     : UInt32 = 0
     static let All      : UInt32 = UInt32.max
-    static let Paddle   : UInt32 = 0b1
-    static let Ball     : UInt32 = 0b10
+    static let Ball     : UInt32 = 0b1
+    static let Paddle   : UInt32 = 0b10
+    static let Border   :UInt32 = 0b100
 }
 
 import SpriteKit
@@ -27,7 +28,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let paddleRight = SKSpriteNode(color:UIColor.redColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
     let ball = SKShapeNode(circleOfRadius: kBallDiameter/2)
     
-    
     override func didMoveToView(view: SKView) {
         
         backgroundColor = UIColor.blackColor()
@@ -35,14 +35,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.gravity = CGVectorMake(0, 0)
         physicsWorld.contactDelegate = self;
         
+        //border
+        self.physicsBody = SKPhysicsBody(edgeLoopFromRect: self.frame)
+        self.physicsBody?.dynamic = true
+        self.physicsBody?.categoryBitMask = PhysicsCategory.Border
+        self.physicsBody?.contactTestBitMask = PhysicsCategory.Ball
+        self.physicsBody?.collisionBitMask = PhysicsCategory.None
+        
         //ball
         ball.fillColor = UIColor.whiteColor()
         ball.physicsBody = SKPhysicsBody(rectangleOfSize: CGSizeMake(kBallDiameter, kBallDiameter))
+        ball.physicsBody?.linearDamping = 0
         ball.physicsBody?.dynamic = true
         ball.physicsBody?.categoryBitMask = PhysicsCategory.Ball
         ball.physicsBody?.contactTestBitMask = PhysicsCategory.Paddle
         ball.physicsBody?.collisionBitMask = PhysicsCategory.None //i think i want to handle this myself
-        ball.position = CGPoint(x: size.width / 2, y: size.height + kBallDiameter)
+        ball.position = CGPoint(x: size.width / 2, y: size.height + 1)
         addChild(ball)
         
         paddleLeft.physicsBody = SKPhysicsBody(rectangleOfSize: paddleLeft.size);
@@ -55,6 +63,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
         paddleRight.physicsBody = SKPhysicsBody(rectangleOfSize: paddleRight.size);
         paddleRight.physicsBody?.dynamic = true
+        paddleRight.physicsBody?.angularDamping = 0
         paddleRight.physicsBody?.categoryBitMask = PhysicsCategory.Paddle
         paddleRight.physicsBody?.contactTestBitMask = PhysicsCategory.Ball
         paddleRight.physicsBody?.collisionBitMask = PhysicsCategory.None
@@ -68,12 +77,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func startGame() {
         ball.physicsBody?.velocity = CGVectorMake(startingVx, startingVy);
     }
-        
-    override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
-     
+    
+    override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
+        for touch in touches {
+            
+            let touchLocation = touch.locationInNode(self)
+            
+            if (touchLocation.x < self.size.height/3) {
+                paddleLeft.position.y = touchLocation.y;
+            }
+            else if (touchLocation.x > self.size.height/3) {
+                paddleRight.position.y = touchLocation.y;
+            }
+        }
     }
 
-    
+    func didBeginContact(contact: SKPhysicsContact) {
+        var firstBody: SKPhysicsBody
+        var secondBody: SKPhysicsBody
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        } else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
+        }
+        
+        if ((firstBody.categoryBitMask & PhysicsCategory.Ball != 0) && (secondBody.categoryBitMask & PhysicsCategory.Paddle != 0)) {
+            firstBody.velocity.dx = -firstBody.velocity.dx
+        }
+        
+        else if ((firstBody.categoryBitMask & PhysicsCategory.Ball != 0) && (secondBody.categoryBitMask & PhysicsCategory.Border != 0)) {
+            //check if left side
+            if (firstBody.node?.position.x <= firstBody.node!.frame.size.width) {
+                //let if go off, point
+            }
+            if (firstBody.node?.position.x >= (self.size.width - firstBody.node!.frame.size.width))
+            {
+                //let it go off, point
+            }
+            else {
+                firstBody.velocity.dy = -firstBody.velocity.dy
+
+            }
+        }
+    }
+
     func random() -> CGFloat {
         return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
     }
