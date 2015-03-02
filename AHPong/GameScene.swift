@@ -19,14 +19,21 @@ import SpriteKit
 let kPaddleWidth:CGFloat = 20
 let kPaddleHeight:CGFloat = 60
 let kBallDiameter:CGFloat = 20
-let startingVx:CGFloat = 130
-let startingVy:CGFloat = -130
+let initialSpeed:CGFloat = 130
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class GameScene: SKScene, SKPhysicsContactDelegate, UIAlertViewDelegate {
 
     let paddleLeft = SKSpriteNode(color: UIColor.blueColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
     let paddleRight = SKSpriteNode(color:UIColor.redColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
     let ball = SKShapeNode(circleOfRadius: kBallDiameter/2)
+
+    var leftScore = 0
+    var rightScore = 0
+    let rightScoreNode = SKLabelNode()
+    let leftScoreNode = SKLabelNode()
+    
+    var startingVx:CGFloat = Int(arc4random_uniform(2)) > 0 ? -initialSpeed : initialSpeed
+    var startingVy:CGFloat = -initialSpeed
     
     override func didMoveToView(view: SKView) {
         
@@ -49,10 +56,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         ball.physicsBody?.dynamic = true
         ball.physicsBody?.categoryBitMask = PhysicsCategory.Ball
         ball.physicsBody?.contactTestBitMask = PhysicsCategory.Paddle
-        ball.physicsBody?.collisionBitMask = PhysicsCategory.None //i think i want to handle this myself
+        ball.physicsBody?.collisionBitMask = PhysicsCategory.None
         ball.position = CGPoint(x: size.width / 2, y: size.height + 1)
         addChild(ball)
         
+        //paddles
         paddleLeft.physicsBody = SKPhysicsBody(rectangleOfSize: paddleLeft.size);
         paddleLeft.physicsBody?.dynamic = true
         paddleLeft.physicsBody?.categoryBitMask = PhysicsCategory.Paddle
@@ -70,12 +78,38 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         paddleRight.position = CGPoint(x: size.width - (size.width / 20), y: size.height / 2)
         addChild(paddleRight)
         
-        startGame()
+        //labels
+        var spacing = CGFloat(20)
+        leftScoreNode.text = String(leftScore)
+        leftScoreNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Left
+        leftScoreNode.position = CGPoint(x: size.width/2.0 - leftScoreNode.frame.size.width - spacing, y: size.height - leftScoreNode.frame.size.height - spacing)
+        addChild(leftScoreNode)
         
+        rightScoreNode.text = String(rightScore)
+        rightScoreNode.horizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Right
+        rightScoreNode.position = CGPoint(x: size.width/2.0 + rightScoreNode.frame.size.width + spacing, y: size.height - rightScoreNode.frame.size.height - spacing)
+        addChild(rightScoreNode)
+        
+        showAlert("Start game")
     }
     
-    func startGame() {
-        ball.physicsBody?.velocity = CGVectorMake(startingVx, startingVy);
+    func showAlert(title: String) {
+        let startAlert = UIAlertView(title: title, message: "Hit OK to begin a game", delegate: self, cancelButtonTitle: "OK")
+        startAlert.show()
+    }
+    
+    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+        rightScore = 0
+        rightScoreNode.text = String(rightScore)
+        leftScore = 0
+        leftScoreNode.text = String(leftScore)
+        releaseBall()
+    }
+    
+    func releaseBall() {
+        let moveAction = SKAction.moveTo(CGPoint(x: size.width / 2, y: size.height + 1), duration: NSTimeInterval(0))
+        let velocityAction = SKAction.runBlock { self.ball.physicsBody?.velocity = CGVectorMake(self.startingVx, self.startingVy); return () }
+        ball.runAction(SKAction.sequence([moveAction, velocityAction]))
     }
     
     override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
@@ -110,11 +144,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         else if ((firstBody.categoryBitMask & PhysicsCategory.Ball != 0) && (secondBody.categoryBitMask & PhysicsCategory.Border != 0)) {
             //check if left side
             if (firstBody.node?.position.x <= firstBody.node!.frame.size.width) {
-                //let if go off, point
+                setScore(false)
             }
+            //check if right side
             if (firstBody.node?.position.x >= (self.size.width - firstBody.node!.frame.size.width))
             {
-                //let it go off, point
+                setScore(true)
             }
             else {
                 firstBody.velocity.dy = -firstBody.velocity.dy
@@ -122,12 +157,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
     }
-
-    func random() -> CGFloat {
-        return CGFloat(Float(arc4random()) / 0xFFFFFFFF)
-    }
     
-    func random(#min: CGFloat, max: CGFloat) -> CGFloat {
-        return random() * (max - min) + min
+    func setScore(leftPoint: Bool)
+    {
+        if (leftPoint) {
+            leftScore++
+            leftScoreNode.text = String(leftScore)
+            startingVx = -initialSpeed
+        }
+        else {
+            rightScore++
+            rightScoreNode.text = String(rightScore)
+            startingVx = initialSpeed
+        }
+        if (leftScore >= 10 || rightScore >= 10) {
+            showAlert("Game over")
+        }
+        else {
+            releaseBall()
+        }
     }
 }
