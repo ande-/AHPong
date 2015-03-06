@@ -21,7 +21,7 @@ let kPaddleHeight:CGFloat = 60
 let kBallDiameter:CGFloat = 20
 let initialSpeed:CGFloat = 130
 
-class GameScene: SKScene, SKPhysicsContactDelegate, UIAlertViewDelegate {
+class GameScene: SKScene, SKPhysicsContactDelegate {
 
     let paddleLeft = SKSpriteNode(color: UIColor.blueColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
     let paddleRight = SKSpriteNode(color:UIColor.redColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
@@ -32,11 +32,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIAlertViewDelegate {
     let rightScoreNode = SKLabelNode()
     let leftScoreNode = SKLabelNode()
     
+    let messageLabel = SKLabelNode()
+    let button = SKLabelNode(text: "OK")
+    
     var startingVx:CGFloat = Int(arc4random_uniform(2)) > 0 ? -initialSpeed : initialSpeed
     var startingVy:CGFloat = -initialSpeed
     
     override func didMoveToView(view: SKView) {
-        
+        messageLabel.position = CGPoint(x: size.width/2, y: size.height - size.height/3)
+        button.position = CGPoint(x: size.width/2, y: size.height/2)
         backgroundColor = UIColor.blackColor()
 
         physicsWorld.gravity = CGVectorMake(0, 0)
@@ -90,15 +94,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIAlertViewDelegate {
         rightScoreNode.position = CGPoint(x: size.width/2.0 + rightScoreNode.frame.size.width + spacing, y: size.height - rightScoreNode.frame.size.height - spacing)
         addChild(rightScoreNode)
         
-        showAlert("Start game")
+        showMessage("Start game")
     }
     
-    func showAlert(title: String) {
-        let startAlert = UIAlertView(title: title, message: "Hit OK to begin a game", delegate: self, cancelButtonTitle: "OK")
-        startAlert.show()
+    func showMessage(title: String) {
+        messageLabel.text = title
+        addChild(messageLabel)
+        addChild(button)
     }
     
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+    func okClicked() {
         rightScore = 0
         rightScoreNode.text = String(rightScore)
         leftScore = 0
@@ -112,15 +117,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIAlertViewDelegate {
         ball.runAction(SKAction.sequence([moveAction, velocityAction]))
     }
     
+    override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
+        for touch in touches {
+            let location = touch.locationInNode(self)
+            let node = nodeAtPoint(location)
+            if (node == button) {
+                messageLabel.removeFromParent()
+                button.removeFromParent()
+                okClicked()
+            }
+        }
+    }
+    
     override func touchesMoved(touches: NSSet, withEvent event: UIEvent) {
         for touch in touches {
             
             let touchLocation = touch.locationInNode(self)
             
-            if (touchLocation.x < self.size.height/3) {
+            if (touchLocation.x < size.width/3) {
                 paddleLeft.position.y = touchLocation.y;
             }
-            else if (touchLocation.x > self.size.height/3) {
+            else if (touchLocation.x > size.width - size.width/3) {
                 paddleRight.position.y = touchLocation.y;
             }
         }
@@ -147,7 +164,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIAlertViewDelegate {
                 setScore(false)
             }
             //check if right side
-            if (firstBody.node?.position.x >= (self.size.width - firstBody.node!.frame.size.width))
+            if (firstBody.node?.position.x >= (size.width - firstBody.node!.frame.size.width))
             {
                 setScore(true)
             }
@@ -171,7 +188,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIAlertViewDelegate {
             startingVx = initialSpeed
         }
         if (leftScore >= 10 || rightScore >= 10) {
-            showAlert("Game over")
+            showMessage("Game over")
         }
         else {
             releaseBall()
