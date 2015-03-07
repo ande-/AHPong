@@ -16,7 +16,6 @@ class GameViewController: UIViewController {
 
         let scene = GameScene(size: view.bounds.size)
         let skview = view as SKView
-        skview.showsFPS = true
         skview.ignoresSiblingOrder = true
         scene.scaleMode = .ResizeFill
         skview.presentScene(scene)
