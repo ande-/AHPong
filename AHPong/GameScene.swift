@@ -19,22 +19,22 @@ import SpriteKit
 let kPaddleWidth:CGFloat = 20
 let kPaddleHeight:CGFloat = 60
 let kBallDiameter:CGFloat = 20
-let initialSpeed:CGFloat = 130
+var initialSpeed:CGFloat = 130
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-
-    let paddleLeft = SKSpriteNode(color: UIColor.blueColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
-    let paddleRight = SKSpriteNode(color:UIColor.redColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
-    let ball = SKShapeNode(circleOfRadius: kBallDiameter/2)
-
-    var leftScore = 0
-    var rightScore = 0
     let rightScoreNode = SKLabelNode()
     let leftScoreNode = SKLabelNode()
     
     let messageLabel = SKLabelNode()
     let button = SKLabelNode(text: "OK")
     
+    var leftScore = 0
+    var rightScore = 0
+    
+    let paddleLeft = SKSpriteNode(color: UIColor.blueColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
+    let paddleRight = SKSpriteNode(color:UIColor.redColor(), size: CGSizeMake(kPaddleWidth, kPaddleHeight))
+    let ball = SKShapeNode(circleOfRadius: kBallDiameter/2)
+
     var startingVx:CGFloat = Int(arc4random_uniform(2)) > 0 ? -initialSpeed : initialSpeed
     var startingVy:CGFloat = -initialSpeed
     
@@ -44,7 +44,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         backgroundColor = UIColor.blackColor()
 
         physicsWorld.gravity = CGVectorMake(0, 0)
-        physicsWorld.contactDelegate = self;
+        physicsWorld.contactDelegate = self
         
         //border
         self.physicsBody = SKPhysicsBody(edgeLoopFromRect: self.frame)
@@ -65,7 +65,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(ball)
         
         //paddles
-        paddleLeft.physicsBody = SKPhysicsBody(rectangleOfSize: paddleLeft.size);
+        paddleLeft.physicsBody = SKPhysicsBody(rectangleOfSize: paddleLeft.size)
         paddleLeft.physicsBody?.dynamic = true
         paddleLeft.physicsBody?.categoryBitMask = PhysicsCategory.Paddle
         paddleLeft.physicsBody?.contactTestBitMask = PhysicsCategory.Ball
@@ -73,7 +73,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         paddleLeft.position = CGPoint(x: size.width / 20, y: size.height / 2)
         addChild(paddleLeft)
 
-        paddleRight.physicsBody = SKPhysicsBody(rectangleOfSize: paddleRight.size);
+        paddleRight.physicsBody = SKPhysicsBody(rectangleOfSize: paddleRight.size)
         paddleRight.physicsBody?.dynamic = true
         paddleRight.physicsBody?.angularDamping = 0
         paddleRight.physicsBody?.categoryBitMask = PhysicsCategory.Paddle
@@ -112,6 +112,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func releaseBall() {
+        initialSpeed += 5
         let moveAction = SKAction.moveTo(CGPoint(x: size.width / 2, y: size.height + 1), duration: NSTimeInterval(0))
         let velocityAction = SKAction.runBlock { self.ball.physicsBody?.velocity = CGVectorMake(self.startingVx, self.startingVy); return () }
         ball.runAction(SKAction.sequence([moveAction, velocityAction]))
@@ -135,10 +136,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let touchLocation = touch.locationInNode(self)
             
             if (touchLocation.x < size.width/3) {
-                paddleLeft.position.y = touchLocation.y;
+                paddleLeft.position.y = touchLocation.y
             }
             else if (touchLocation.x > size.width - size.width/3) {
-                paddleRight.position.y = touchLocation.y;
+                paddleRight.position.y = touchLocation.y
             }
         }
     }
