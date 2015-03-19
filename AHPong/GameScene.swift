@@ -19,7 +19,7 @@ import SpriteKit
 let kPaddleWidth:CGFloat = 20
 let kPaddleHeight:CGFloat = 60
 let kBallDiameter:CGFloat = 20
-var initialSpeed:CGFloat = 130
+var initialSpeed:CGFloat = 150
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     let rightScoreNode = SKLabelNode()
@@ -112,7 +112,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func releaseBall() {
-        initialSpeed += 5
+        initialSpeed += 4
         let moveAction = SKAction.moveTo(CGPoint(x: size.width / 2, y: size.height + 1), duration: NSTimeInterval(0))
         let velocityAction = SKAction.runBlock { self.ball.physicsBody?.velocity = CGVectorMake(self.startingVx, self.startingVy); return () }
         ball.runAction(SKAction.sequence([moveAction, velocityAction]))
@@ -182,11 +182,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             leftScore++
             leftScoreNode.text = String(leftScore)
             startingVx = -initialSpeed
+            startingVy = -initialSpeed;
         }
         else {
             rightScore++
             rightScoreNode.text = String(rightScore)
             startingVx = initialSpeed
+            startingVy = -initialSpeed;
         }
         if (leftScore >= 10 || rightScore >= 10) {
             showMessage("Game over")
