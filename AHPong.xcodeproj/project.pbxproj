@@ -14,6 +14,7 @@
 		001D8E9B1A99531900407C8F /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 001D8E9A1A99531900407C8F /* Images.xcassets */; };
 		001D8E9E1A99531900407C8F /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 001D8E9C1A99531900407C8F /* LaunchScreen.xib */; };
 		001D8EAA1A99531A00407C8F /* AHPongTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 001D8EA91A99531A00407C8F /* AHPongTests.swift */; };
+		0084C1D51ABB9EB000762FAD /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0084C1D41ABB9EB000762FAD /* GameKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +39,7 @@
 		001D8EA31A99531A00407C8F /* AHPongTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AHPongTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		001D8EA81A99531A00407C8F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		001D8EA91A99531A00407C8F /* AHPongTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AHPongTests.swift; sourceTree = "<group>"; };
+		0084C1D41ABB9EB000762FAD /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0084C1D51ABB9EB000762FAD /* GameKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,6 +64,7 @@
 		001D8E811A99531600407C8F = {
 			isa = PBXGroup;
 			children = (
+				0084C1D41ABB9EB000762FAD /* GameKit.framework */,
 				001D8E8C1A99531600407C8F /* AHPong */,
 				001D8EA61A99531A00407C8F /* AHPongTests */,
 				001D8E8B1A99531600407C8F /* Products */,
@@ -164,6 +168,12 @@
 				TargetAttributes = {
 					001D8E891A99531600407C8F = {
 						CreatedOnToolsVersion = 6.1.1;
+						DevelopmentTeam = GW49NKHN84;
+						SystemCapabilities = {
+							com.apple.GameCenter = {
+								enabled = 1;
+							};
+						};
 					};
 					001D8EA21A99531A00407C8F = {
 						CreatedOnToolsVersion = 6.1.1;
@@ -340,9 +350,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = AHPong/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -350,9 +363,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = AHPong/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};
